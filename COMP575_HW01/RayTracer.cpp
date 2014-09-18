@@ -15,44 +15,9 @@ float* RayTracer::traceImage()
 {
     RayTracer::initVariables();
 
-    // Offset on the View Plane
-    float co_u = -0.1, co_v = -0.1;
-    float u_LimitLeft = View_Plane.LimitLeft;
-    float v_LimitBottom = View_Plane.LimitBottom;
-    float increment = 0.1/(512/2);
-    vec3 dotOnViewPlane  = co_u*WorldDirection_u + co_v*WorldDirection_v - View_Plane.distance*WorldDirection_w - CameraPositionPoint;
-    for (int i = 0; i < 512; i++) {
-        co_v = v_LimitBottom + increment*i;
-        for (int j = 0; j < 512; j++) {
-            co_u = u_LimitLeft + increment*j;
-            
-            dotOnViewPlane = co_u*WorldDirection_u + co_v*WorldDirection_v - View_Plane.distance*WorldDirection_w - CameraPositionPoint;
-            vec3 eyeToDotOnViewPlane = dotOnViewPlane - CameraPositionPoint;
-//            cout << "eyeToDotOnViewPlane: " << eyeToDotOnViewPlane;
-            
-            vec3 p = CameraPositionPoint;
-            vec3 d = eyeToDotOnViewPlane;
-            vec3 c = sphere01.center;
-            float r = sphere01.radius;
-            
-            float delta_a = dot(d,d);
-            float delta_b = 2.0*(dot(p,d)-dot(d, c));
-            float delta_c = dot(p,p)-2.0*(dot(c,p))+dot(c,c)-pow(r, 2);
-            
-            float determinant = pow(delta_b, 2)-4.0*(delta_a*delta_c);
-//            cout << "Result: " << determinant << "\n";
-            
-            if (determinant > 0) {
-                cout << "Result: " << determinant << "\n";
-                pixels[(i*512+j)*4]=0.5;
-            }
-        }
-    }
-    cout << "Finished! ";
-    
-    
-    
-    
+    RayTracer::traceSphereForHW01(sphere01, vec4(1,0,0,1));
+    RayTracer::traceSphereForHW01(sphere02, vec4(0,1,0,1));
+    RayTracer::traceSphereForHW01(sphere03, vec4(0,0,1,1));
     
 //    // Draw pixels
 //    for(int i=0;i<size*4;i+=4) {
@@ -64,6 +29,47 @@ float* RayTracer::traceImage()
     return pixels;
 }
 
+void RayTracer::traceSphereForHW01(const Sphere& sphere, const vec4& colorRGBA)
+{
+    // Offset on the View Plane
+    float co_u = -0.1, co_v = -0.1;
+    
+    float u_LimitLeft = View_Plane.LimitLeft;
+    float v_LimitBottom = View_Plane.LimitBottom;
+    float increment = 0.1/(512/2);
+    vec3 dotOnViewPlane  = co_u*WorldDirection_u + co_v*WorldDirection_v - View_Plane.distance*WorldDirection_w - CameraPositionPoint;
+    for (int i = 0; i < 512; i++) {
+        co_v = v_LimitBottom + increment*i;
+        for (int j = 0; j < 512; j++) {
+            co_u = u_LimitLeft + increment*j;
+            
+            dotOnViewPlane = co_u*WorldDirection_u + co_v*WorldDirection_v - View_Plane.distance*WorldDirection_w - CameraPositionPoint;
+            vec3 eyeToDotOnViewPlane = dotOnViewPlane - CameraPositionPoint;
+            //            cout << "eyeToDotOnViewPlane: " << eyeToDotOnViewPlane;
+            
+            vec3 p = CameraPositionPoint;
+            vec3 d = eyeToDotOnViewPlane;
+            vec3 c = sphere.center;
+            float r = sphere.radius;
+            
+            float delta_a = dot(d,d);
+            float delta_b = 2.0*(dot(p,d)-dot(d, c));
+            float delta_c = dot(p,p)-2.0*(dot(c,p))+dot(c,c)-pow(r, 2);
+            
+            float determinant = pow(delta_b, 2)-4.0*(delta_a*delta_c);
+            //            cout << "Result: " << determinant << "\n";
+            
+            if (determinant > 0) {
+                cout << "Result: " << determinant << "\n";
+                pixels[(i*512+j)*4+0]=colorRGBA.r;
+                pixels[(i*512+j)*4+1]=colorRGBA.g;
+                pixels[(i*512+j)*4+2]=colorRGBA.b;
+                pixels[(i*512+j)*4+3]=colorRGBA.a;
+            }
+        }
+    }
+    cout << "Finished! ";
+}
 
 void RayTracer::initVariables()
 {

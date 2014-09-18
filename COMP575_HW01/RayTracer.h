@@ -12,6 +12,8 @@
 #include <iostream>
 #include "Config.h"
 using namespace std;
+using namespace glm;
+class Sphere;
 
 class RayTracer
 {
@@ -21,6 +23,7 @@ public:
     RayTracer(){}
     float* traceImage();
     void initVariables();
+    void traceSphereForHW01(const Sphere& sphere, const vec4& colorRGBA);
 };
 
 

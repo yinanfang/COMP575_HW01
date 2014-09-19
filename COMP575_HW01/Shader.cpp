@@ -13,17 +13,17 @@ float GammaValue = 2.2;
 
 vec3 Shader::shadePixel(const HitRecord& hitRecord)
 {
-    vec3 intersectPoint = hitRecord.hitPoint;
     vec3 eyeRay = hitRecord.eyeRay.vectorDirection;
-    vec3 normal = hitRecord.normal;
+    vec3 eyeRayInverse = -normalize(eyeRay);
+    vec3 normal = normalize(hitRecord.normal);
+    vec3 intersectPoint = hitRecord.hitPoint;
+    vec3 incomingLightInverse = -normalize(intersectPoint-LightSourcePoint);
     if (hitRecord.eyeRay.multiple == Infinity) {
         return vec3 (0,0,0);
     }
     
     
     vec3 colorRGB, L_a, L_d, L_s;
-    vec3 incomingLightInverse = -normalize(intersectPoint-LightSourcePoint);
-    vec3 eyeRayInverse = -normalize(eyeRay);
     
     // Ambient
     L_a = hitRecord.object->k_a;
@@ -37,7 +37,7 @@ vec3 Shader::shadePixel(const HitRecord& hitRecord)
     vec3 l = incomingLightInverse;
     vec3 h = normalize(v+l);
     float normal_dot_h = dot(normal, h);
-    L_s = hitRecord.object->k_s * LightIllumination * pow(std::max(0.0f, normal_dot_h),SpecularPower);
+    L_s = hitRecord.object->k_s * LightIllumination * pow(std::max(0.0f, normal_dot_h),hitRecord.object->SpecularPower);
     
     colorRGB = L_a + L_d + L_s;
     return colorRGB;

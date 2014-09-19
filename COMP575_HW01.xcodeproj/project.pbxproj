@@ -17,6 +17,7 @@
 		D453D0AF19CB3B1E00E74366 /* World.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D453D0A519CB3B1E00E74366 /* World.cpp */; };
 		D453D0B119CB3B2F00E74366 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D453D0B019CB3B2F00E74366 /* OpenGL.framework */; };
 		D453D0B319CB3B3500E74366 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D453D0B219CB3B3500E74366 /* GLUT.framework */; };
+		D453D2B919CB9F9B00E74366 /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D453D2B719CB9F9B00E74366 /* Shader.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -302,6 +303,8 @@
 		D453D2B319CB3C8E00E74366 /* vec3.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vec3.hpp; sourceTree = "<group>"; };
 		D453D2B419CB3C8E00E74366 /* vec4.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vec4.hpp; sourceTree = "<group>"; };
 		D453D2B519CB3C8E00E74366 /* vector_relational.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vector_relational.hpp; sourceTree = "<group>"; };
+		D453D2B719CB9F9B00E74366 /* Shader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Shader.cpp; sourceTree = "<group>"; };
+		D453D2B819CB9F9B00E74366 /* Shader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Shader.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -342,6 +345,8 @@
 				D453D09E19CB3B1E00E74366 /* main.cpp */,
 				D453D0A119CB3B1E00E74366 /* RayTracer.cpp */,
 				D453D0A219CB3B1E00E74366 /* RayTracer.h */,
+				D453D2B719CB9F9B00E74366 /* Shader.cpp */,
+				D453D2B819CB9F9B00E74366 /* Shader.h */,
 				D453CF9A19CB3B1D00E74366 /* Camera.cpp */,
 				D453CF9B19CB3B1D00E74366 /* Camera.h */,
 				D453D09F19CB3B1E00E74366 /* Object.cpp */,
@@ -693,6 +698,7 @@
 			files = (
 				D453D0A719CB3B1E00E74366 /* Camera.cpp in Sources */,
 				D453D0AF19CB3B1E00E74366 /* World.cpp in Sources */,
+				D453D2B919CB9F9B00E74366 /* Shader.cpp in Sources */,
 				D453D0AC19CB3B1E00E74366 /* Object.cpp in Sources */,
 				D453D0AB19CB3B1E00E74366 /* main.cpp in Sources */,
 				D453D0A819CB3B1E00E74366 /* Config.cpp in Sources */,

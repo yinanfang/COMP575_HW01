@@ -11,9 +11,11 @@
 
 #include <iostream>
 #include "Config.h"
+#include "Object.h"
 using namespace std;
 using namespace glm;
 class Sphere;
+class Plane;
 
 class RayTracer
 {
@@ -23,7 +25,9 @@ public:
     RayTracer(){}
     float* traceImage();
     void initVariables();
-    void traceSphereForHW01(const Sphere& sphere, const vec4& colorRGBA);
+    void traceSphereForHW01(const Sphere& sphere, const vec3& k_d);
+    void tracePlaneForHW01(const Plane& plane, const vec4& colorRGBA, const vec3& k_d);
+
 };
 
 

@@ -25,14 +25,15 @@ ViewPlane::ViewPlane(float _LimitLeft, float _LimitRight, float _LimitBottom, fl
 
 
 
-EyeRay::EyeRay(vec3 _eyePosition, vec3 _rayDirection)
+vec3 EyeRay::getEyeRay(float co_u, float co_v, float co_w)
 {
-    eyePosition = _eyePosition;
-    rayDirection = _rayDirection;
+    vec3 dotOnViewPlane = co_u*WorldDirection_u + co_v*WorldDirection_v - View_Plane.distance*WorldDirection_w - CameraPositionPoint;
+    vec3 eyeToDotOnViewPlane = dotOnViewPlane - CameraPositionPoint;
+    return eyeToDotOnViewPlane;
 }
-ostream& operator<<(ostream& os, const EyeRay& eyeRay)
-{
-    os << "eyeRay(" << eyeRay.eyePosition.x << ", " << eyeRay.eyePosition.y << ", " << eyeRay.eyePosition.z << ")";
-    os << "eyeRay(" << eyeRay.rayDirection.x << ", " << eyeRay.rayDirection.y << ", " << eyeRay.rayDirection.z << ")";
-    return os;
-}
+//ostream& operator<<(ostream& os, const EyeRay& eyeRay)
+//{
+//    os << "eyeRay(" << eyeRay.eyePosition.x << ", " << eyeRay.eyePosition.y << ", " << eyeRay.eyePosition.z << ")";
+//    os << "eyeRay(" << eyeRay.rayDirection.x << ", " << eyeRay.rayDirection.y << ", " << eyeRay.rayDirection.z << ")";
+//    return os;
+//}

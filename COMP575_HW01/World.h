@@ -17,5 +17,7 @@ extern vec3 WorldDirection_u;
 extern vec3 WorldDirection_v;
 extern vec3 WorldDirection_w;
 
+extern vec3 LightSourcePoint;
+extern vec3 LightIllumination;
 
 #endif /* defined(__Test02__World__) */

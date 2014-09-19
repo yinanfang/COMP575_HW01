@@ -38,16 +38,15 @@ public:
 
 
 
-class EyeRay
+class EyeRay 
 {
 private:
-    vec3 eyePosition;
-    vec3 rayDirection;
+    
 public:
     EyeRay(){}
-    EyeRay(vec3 _eyePosition, vec3 _rayDirection);
+    static vec3 getEyeRay(float co_u, float co_v, float co_w);
     
-    friend ostream& operator<<(ostream& os, const EyeRay& eyeRay);
+//    friend ostream& operator<<(ostream& os, const EyeRay& eyeRay);
 };
 
 

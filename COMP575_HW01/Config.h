@@ -18,6 +18,7 @@
 #include "Camera.h"
 #include "World.h"
 #include "Object.h"
+#include "Shader.h"
 
 using namespace glm;
 using namespace std;

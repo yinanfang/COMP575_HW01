@@ -12,3 +12,6 @@
 vec3 WorldDirection_u;
 vec3 WorldDirection_v;
 vec3 WorldDirection_w;
+
+vec3 LightSourcePoint;
+vec3 LightIllumination;

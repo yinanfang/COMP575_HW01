@@ -24,6 +24,7 @@ public:
     
     Sphere(){}
     Sphere(vec3 center, float radius);
+    float getDeterminantForSphereIntersectedByLine(const vec3& eyeRay)const;
     
 //    bool intersectByEyeRay(vec3 eyeRay);
 };
@@ -37,6 +38,7 @@ public:
     float b;
     float c;
     float d;
+    vec3 normal;
     
     Plane(){}
     Plane(float a, float b, float c, float d);

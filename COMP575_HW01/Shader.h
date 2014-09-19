@@ -14,7 +14,6 @@
 
 using namespace std;
 
-extern vec3 k_a, k_d, k_s;
 extern float SpecularPower;
 extern float GammaValue;
 

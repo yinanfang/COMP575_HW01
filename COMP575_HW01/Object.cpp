@@ -27,14 +27,20 @@ float Sphere::getDeterminantForSphereIntersectedByLine(const vec3& eyeRay)const
     
     return determinant;
 }
-
-//bool Sphere::isIntersectByRay(const vec3& ray)
-//{
-//    
-//    return false;
-//}
-   
-   
+bool Sphere::isIntersectedByRay(const vec3& start, const vec3& vectorDirection)const
+{
+    vec3 p = start;
+    vec3 d = vectorDirection;
+    vec3 c = center;
+    float r = radius;
+    
+    float delta_a = dot(d,d);
+    float delta_b = 2.0*(dot(p,d)-dot(d, c));
+    float delta_c = dot(p,p)-2.0*(dot(c,p))+dot(c,c)-pow(r, 2);
+    float determinant = pow(delta_b, 2)-4.0*(delta_a*delta_c);
+    
+    return determinant>0?true:false;
+}
 
 Plane::Plane(float _a, float _b, float _c, float _d)
 {
@@ -52,4 +58,18 @@ Plane::Plane(vec3 point, vec3 _normal)
     c = _normal.z;
     d = -(a*point.x) - (b*point.y) - (c*point.z);
     normal = normalize(_normal);
+}
+
+bool Plane::isIntersectedByRay(const vec3& start, const vec3& vectorDirection)const
+{
+    float p_a = a;
+    float p_b = b;
+    float p_c = c;
+    float p_d = d;
+    vec3 p = start;
+    vec3 d = vectorDirection;
+    
+    float intersectT = -(p_a*p.x+p_b*p.y+p_c*p.z+p_d) / (p_a*d.x+p_b*d.y+p_c*d.z);
+    
+    return intersectT>0?true:false;
 }

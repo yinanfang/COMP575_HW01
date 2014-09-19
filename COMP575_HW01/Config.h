@@ -19,6 +19,7 @@
 #include "World.h"
 #include "Object.h"
 #include "Shader.h"
+#include <limits>
 
 using namespace glm;
 using namespace std;
@@ -28,5 +29,6 @@ extern int size;
 extern float *pixels;
 extern vec3 PointZero;
 
+const float Infinity = std::numeric_limits<float>::infinity();
 
 #endif /* defined(__Test02__Config__) */

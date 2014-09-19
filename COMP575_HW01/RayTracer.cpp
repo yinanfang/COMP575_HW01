@@ -8,39 +8,51 @@
 
 #include "RayTracer.h"
 
-Sphere sphere01, sphere02, sphere03;
-Plane HorozonPlane;
+std::vector<Object*> objectsList;
+Sphere *sphere01, *sphere02, *sphere03;
+Plane *HorizontalPlane;
 
-float* RayTracer::traceImage()
+float* RayTracer::runRayTracer()
 {
     RayTracer::initVariables();
 
-    k_a = vec3(0.2,0.2,0.2);
-    k_d = vec3(1,1,1);
-    k_s = vec3(0,0,0);
-    SpecularPower = 0.0;
-    RayTracer::tracePlaneForHW01(HorozonPlane, vec4(1,1,1,1), vec3(1,1,1));
+    RayTracer::traceObjects();
     
-    k_a = vec3(0.2,0,0);
-    k_d = vec3(1,0,0);
-    k_s = vec3(0,0,0);
-    SpecularPower = 0.0;
-    RayTracer::traceSphereForHW01(sphere01, vec3(1,0,0));
     
-    k_a = vec3(0,0.2,0);
-    k_d = vec3(0,0.5,0);
-    k_s = vec3(0.5,0.5,0.5);
-    SpecularPower = 32.0;
-    RayTracer::traceSphereForHW01(sphere02, vec3(0,0.5,0));
     
-    k_a = vec3(0,0,0.2);
-    k_d = vec3(0,0,1);
-    k_s = vec3(0,0,0);
-    SpecularPower = 0.0;
-    RayTracer::traceSphereForHW01(sphere03, vec3(0,0,1));
-
+//    RayTracer::tracePlaneForHW01(HorozonPlane, vec4(1,1,1,1), vec3(1,1,1));
+//    RayTracer::traceSphereForHW01(sphere01, vec3(1,0,0));
+//    RayTracer::traceSphereForHW01(sphere02, vec3(0,0.5,0));
+//    RayTracer::traceSphereForHW01(sphere03, vec3(0,0,1));
 
     return pixels;
+}
+
+void RayTracer::traceObjects()
+{
+    // Offset on the View Plane
+    float co_u = View_Plane.LimitLeft, co_v = View_Plane.LimitBottom;
+    
+    float u_LimitLeft = View_Plane.LimitLeft;
+    float v_LimitBottom = View_Plane.LimitBottom;
+    float increment = 0.1/(512/2);
+    for (int i = 0; i < 512; i++) {
+        co_v = v_LimitBottom + increment*i;
+        for (int j = 0; j < 512; j++) {
+            co_u = u_LimitLeft + increment*j;
+    
+            vec3 eyeRay = EyeRay::getEyeRay(co_u, co_v, -View_Plane.distance);
+            
+            for (int i=0; i<objectsList.size(); i++) {
+                Object *object = objectsList[i];
+                if (object->isIntersectedByRay(CameraPositionPoint, eyeRay)) {
+                    <#statements#>
+                }
+            }
+            
+            
+        }
+    }
 }
 
 void RayTracer::traceSphereForHW01(const Sphere& sphere, const vec3& k_d)
@@ -56,6 +68,8 @@ void RayTracer::traceSphereForHW01(const Sphere& sphere, const vec3& k_d)
         for (int j = 0; j < 512; j++) {
             co_u = u_LimitLeft + increment*j;
    
+            
+            
             vec3 eyeRay = EyeRay::getEyeRay(co_u, co_v, -View_Plane.distance);
             
             vec3 p = CameraPositionPoint;
@@ -80,8 +94,6 @@ void RayTracer::traceSphereForHW01(const Sphere& sphere, const vec3& k_d)
                 pixels[(i*512+j)*4+1]=pow(ColorShade.g, (1/GammaValue));
                 pixels[(i*512+j)*4+2]=pow(ColorShade.b, (1/GammaValue));
                 pixels[(i*512+j)*4+3]=1.0f;
-                
-
             }
         }
     }
@@ -98,45 +110,32 @@ void RayTracer::tracePlaneForHW01(const Plane& plane, const vec4& colorRGBA, con
     float u_LimitLeft = View_Plane.LimitLeft;
     float v_LimitBottom = View_Plane.LimitBottom;
     float increment = 0.1/(512/2);
-    vec3 dotOnViewPlane  = co_u*WorldDirection_u + co_v*WorldDirection_v - View_Plane.distance*WorldDirection_w - CameraPositionPoint;
     for (int i = 0; i < 512; i++) {
         co_v = v_LimitBottom + increment*i;
         for (int j = 0; j < 512; j++) {
             co_u = u_LimitLeft + increment*j;
             
-            dotOnViewPlane = co_u*WorldDirection_u + co_v*WorldDirection_v - View_Plane.distance*WorldDirection_w - CameraPositionPoint;
-            vec3 eyeToDotOnViewPlane = dotOnViewPlane - CameraPositionPoint;
-            //            cout << "eyeToDotOnViewPlane: " << eyeToDotOnViewPlane;
+            vec3 eyeRay = EyeRay::getEyeRay(co_u, co_v, -View_Plane.distance);
             
-            vec3 p = CameraPositionPoint;
-            vec3 d = eyeToDotOnViewPlane;
             float p_a = plane.a;
             float p_b = plane.b;
             float p_c = plane.c;
             float p_d = plane.d;
-            
+            vec3 p = CameraPositionPoint;
+            vec3 d = eyeRay;
+
             float intersectT = -(p_a*p.x+p_b*p.y+p_c*p.z+p_d) / (p_a*d.x+p_b*d.y+p_c*d.z);
-            
             
             if (intersectT>0) {
                 vec3 intersectionPoint = p+intersectT*d;
-//                cout << "Result: " << intersectionPoint << "\n";
-                
                 vec3 intersectionNormal = plane.normal;
-                vec3 incomingLight = normalize(intersectionPoint-LightSourcePoint);
-                float n_dot_l = dot(intersectionNormal, incomingLight);
-                float larger_one = (n_dot_l>0.0)?n_dot_l:0.0;
-                vec3 L_d = k_d * 10.0f * (larger_one);
                 
-                pixels[(i*512+j)*4+0]=L_d.r;
-                pixels[(i*512+j)*4+1]=L_d.g;
-                pixels[(i*512+j)*4+2]=L_d.b;
-                pixels[(i*512+j)*4+3]=colorRGBA.a;
+                vec3 ColorShade = Shader::shadePixel(intersectionPoint, intersectionNormal, eyeRay);
                 
-                pixels[(i*512+j)*4+0]=colorRGBA.r;
-                pixels[(i*512+j)*4+1]=colorRGBA.g;
-                pixels[(i*512+j)*4+2]=colorRGBA.b;
-                pixels[(i*512+j)*4+3]=colorRGBA.a;
+                pixels[(i*512+j)*4+0]=pow(ColorShade.r, (1/GammaValue));
+                pixels[(i*512+j)*4+1]=pow(ColorShade.g, (1/GammaValue));
+                pixels[(i*512+j)*4+2]=pow(ColorShade.b, (1/GammaValue));
+                pixels[(i*512+j)*4+3]=1.0f;
             }
         }
     }
@@ -159,11 +158,51 @@ void RayTracer::initVariables()
     LightIllumination = vec3(1, 1, 1);
     
     // Object
-    sphere01 = Sphere(vec3(-4, 0, -7), 1);
-    sphere02 = Sphere(vec3(0, 0, -7), 2);
-    sphere03 = Sphere(vec3(4, 0, -7), 1);
-    HorozonPlane = Plane(vec3(0,-2,0), vec3(0,1,0));
+    HorizontalPlane = new Plane(vec3(0,-2,0), vec3(0,1,0));
+    objectsList.push_back(HorizontalPlane);
+    HorizontalPlane->k_a = vec3(0.2,0.2,0.2);
+    HorizontalPlane->k_d = vec3(1,1,1);
+    HorizontalPlane->k_s = vec3(0,0,0);
+    HorizontalPlane->SpecularPower = 0.0;
+    
+    sphere01 = new Sphere(vec3(-4, 0, -7), 1);
+    objectsList.push_back(sphere01);
+    sphere01->k_a = vec3(0.2,0,0);
+    sphere01->k_d = vec3(1,0,0);
+    sphere01->k_s = vec3(0,0,0);
+    sphere01->SpecularPower = 0.0;
+    
+    sphere02 = new Sphere(vec3(0, 0, -7), 2);
+    objectsList.push_back(sphere02);
+    sphere02->k_a = vec3(0,0.2,0);
+    sphere02->k_d = vec3(0,0.5,0);
+    sphere02->k_s = vec3(0.5,0.5,0.5);
+    sphere02->SpecularPower = 32.0;
+    
+    sphere03 = new Sphere(vec3(4, 0, -7), 1);
+    objectsList.push_back(sphere03);
+    sphere03->k_a = vec3(0,0,0.2);
+    sphere03->k_d = vec3(0,0,1);
+    sphere03->k_s = vec3(0,0,0);
+    sphere03->SpecularPower = 0.0;
 }
+
+
+
+//                vec3 incomingLight = normalize(intersectionPoint-LightSourcePoint);
+//                float n_dot_l = dot(intersectionNormal, incomingLight);
+//                float larger_one = (n_dot_l>0.0)?n_dot_l:0.0;
+//                vec3 L_d = k_d * 10.0f * (larger_one);
+//
+//                pixels[(i*512+j)*4+0]=L_d.r;
+//                pixels[(i*512+j)*4+1]=L_d.g;
+//                pixels[(i*512+j)*4+2]=L_d.b;
+//                pixels[(i*512+j)*4+3]=colorRGBA.a;
+//
+//                pixels[(i*512+j)*4+0]=colorRGBA.r;
+//                pixels[(i*512+j)*4+1]=colorRGBA.g;
+//                pixels[(i*512+j)*4+2]=colorRGBA.b;
+//                pixels[(i*512+j)*4+3]=colorRGBA.a;
 
 //                pixels[(i*512+j)*4+0]=colorRGBA.r;
 //                pixels[(i*512+j)*4+1]=colorRGBA.g;

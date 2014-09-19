@@ -14,7 +14,35 @@
 
 using namespace glm;
 
-class Sphere
+class Object
+{
+public:
+    vec3 k_a;
+    vec3 k_d;
+    vec3 k_s;
+    float SpecularPower;
+    virtual bool isIntersectedByRay(const vec3& start, const vec3& vector) const=0;
+};
+
+class Ray
+{
+public:
+    vec3 start;
+    vec3 vectorDirection;
+    float multiple;
+};
+
+class hitRecord
+{
+public:
+    Ray ray;
+    Object *object;
+    vec3 normal;
+    vec3 hitPoint;
+    
+};
+
+class Sphere:public Object
 {
 private:
     
@@ -24,12 +52,13 @@ public:
     
     Sphere(){}
     Sphere(vec3 center, float radius);
+    virtual bool isIntersectedByRay(const vec3& start, const vec3& vectorDirection)const;
     float getDeterminantForSphereIntersectedByLine(const vec3& eyeRay)const;
     
 //    bool intersectByEyeRay(vec3 eyeRay);
 };
 
-class Plane
+class Plane:public Object
 {
 private:
     
@@ -42,6 +71,7 @@ public:
     
     Plane(){}
     Plane(float a, float b, float c, float d);
+    virtual bool isIntersectedByRay(const vec3& start, const vec3& vectorDirection)const;
     Plane(vec3 point, vec3 normal);
 };
 

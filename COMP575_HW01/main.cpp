@@ -39,7 +39,7 @@ void changeSize(int w, int h) {
 void traceImage(void){
 
     RayTracer tracer;
-    pixels = tracer.traceImage();
+    pixels = tracer.runRayTracer();
     
     
     

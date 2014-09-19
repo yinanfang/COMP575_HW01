@@ -8,7 +8,6 @@
 
 #include "Shader.h"
 
-vec3 k_a, k_d, k_s;
 float SpecularPower;
 float GammaValue = 2.2;
 

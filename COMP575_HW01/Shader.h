@@ -24,7 +24,8 @@ class Shader
 private:
     
 public:
-    static vec3 shadePixel(const vec3& intersectPoint, const vec3& normal, const vec3& eyeRay);
+    static vec3 shadePixel(const HitRecord& hitRecord);
+//    static vec3 shadePixel(const vec3& intersectPoint, const vec3& normal, const vec3& eyeRay);
 };
 
 

@@ -13,6 +13,8 @@
 #include "Config.h"
 
 using namespace glm;
+class HitRecord;
+
 
 class Object
 {
@@ -21,7 +23,8 @@ public:
     vec3 k_d;
     vec3 k_s;
     float SpecularPower;
-    virtual bool isIntersectedByRay(const vec3& start, const vec3& vector) const=0;
+    virtual bool isIntersectedByRay(const vec3& start, const vec3& vectorDirection) const=0;
+    virtual HitRecord getHitRecord(const vec3& start, const vec3& vectorDirection) const=0;
 };
 
 class Ray
@@ -30,12 +33,14 @@ public:
     vec3 start;
     vec3 vectorDirection;
     float multiple;
+    Ray(){}
+    Ray(vec3 start, vec3 vectorDirection, float multiple);
 };
 
-class hitRecord
+class HitRecord
 {
 public:
-    Ray ray;
+    Ray eyeRay;
     Object *object;
     vec3 normal;
     vec3 hitPoint;
@@ -54,6 +59,7 @@ public:
     Sphere(vec3 center, float radius);
     virtual bool isIntersectedByRay(const vec3& start, const vec3& vectorDirection)const;
     float getDeterminantForSphereIntersectedByLine(const vec3& eyeRay)const;
+    virtual HitRecord getHitRecord(const vec3& start, const vec3& vectorDirection) const;
     
 //    bool intersectByEyeRay(vec3 eyeRay);
 };
@@ -71,8 +77,10 @@ public:
     
     Plane(){}
     Plane(float a, float b, float c, float d);
-    virtual bool isIntersectedByRay(const vec3& start, const vec3& vectorDirection)const;
     Plane(vec3 point, vec3 normal);
+    virtual bool isIntersectedByRay(const vec3& start, const vec3& vectorDirection)const;
+    virtual HitRecord getHitRecord(const vec3& start, const vec3& vectorDirection) const;
+    
 };
 
 

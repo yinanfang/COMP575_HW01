@@ -16,7 +16,7 @@ float* RayTracer::runRayTracer()
 {
     RayTracer::initVariables();
 
-    RayTracer::traceObjects();
+    RayTracer::renderImage();
     
     
     
@@ -28,81 +28,7 @@ float* RayTracer::runRayTracer()
     return pixels;
 }
 
-void RayTracer::traceObjects()
-{
-    // Offset on the View Plane
-    float co_u = View_Plane.LimitLeft, co_v = View_Plane.LimitBottom;
-    
-    float u_LimitLeft = View_Plane.LimitLeft;
-    float v_LimitBottom = View_Plane.LimitBottom;
-    float increment = 0.1/(512/2);
-    for (int i = 0; i < 512; i++) {
-        co_v = v_LimitBottom + increment*i;
-        for (int j = 0; j < 512; j++) {
-            co_u = u_LimitLeft + increment*j;
-    
-            vec3 eyeRay = EyeRay::getEyeRay(co_u, co_v, -View_Plane.distance);
-            
-            for (int i=0; i<objectsList.size(); i++) {
-                Object *object = objectsList[i];
-                if (object->isIntersectedByRay(CameraPositionPoint, eyeRay)) {
-                    <#statements#>
-                }
-            }
-            
-            
-        }
-    }
-}
-
-void RayTracer::traceSphereForHW01(const Sphere& sphere, const vec3& k_d)
-{
-    // Offset on the View Plane
-    float co_u = View_Plane.LimitLeft, co_v = View_Plane.LimitBottom;
-    
-    float u_LimitLeft = View_Plane.LimitLeft;
-    float v_LimitBottom = View_Plane.LimitBottom;
-    float increment = 0.1/(512/2);
-    for (int i = 0; i < 512; i++) {
-        co_v = v_LimitBottom + increment*i;
-        for (int j = 0; j < 512; j++) {
-            co_u = u_LimitLeft + increment*j;
-   
-            
-            
-            vec3 eyeRay = EyeRay::getEyeRay(co_u, co_v, -View_Plane.distance);
-            
-            vec3 p = CameraPositionPoint;
-            vec3 d = eyeRay;
-            vec3 c = sphere.center;
-            float r = sphere.radius;
-            
-            float delta_a = dot(d,d);
-            float delta_b = 2.0*(dot(p,d)-dot(d, c));
-            float delta_c = dot(p,p)-2.0*(dot(c,p))+dot(c,c)-pow(r, 2);
-            float determinant = pow(delta_b, 2)-4.0*(delta_a*delta_c);
-
-            if (determinant > 0) {
-                // (-b - delta)/2a
-                float closerT = (-delta_b - glm::sqrt(determinant))/(2*delta_a);
-                vec3 intersectionPoint = p+closerT*d;
-                vec3 intersectionNormal = normalize(intersectionPoint-sphere.center);
-                
-                vec3 ColorShade = Shader::shadePixel(intersectionPoint, intersectionNormal, eyeRay);
-
-                pixels[(i*512+j)*4+0]=pow(ColorShade.r, (1/GammaValue));
-                pixels[(i*512+j)*4+1]=pow(ColorShade.g, (1/GammaValue));
-                pixels[(i*512+j)*4+2]=pow(ColorShade.b, (1/GammaValue));
-                pixels[(i*512+j)*4+3]=1.0f;
-            }
-        }
-    }
-    cout << "Finished! ";
-}
-
-
-
-void RayTracer::tracePlaneForHW01(const Plane& plane, const vec4& colorRGBA, const vec3& k_d)
+void RayTracer::renderImage()
 {
     // Offset on the View Plane
     float co_u = View_Plane.LimitLeft, co_v = View_Plane.LimitBottom;
@@ -115,32 +41,123 @@ void RayTracer::tracePlaneForHW01(const Plane& plane, const vec4& colorRGBA, con
         for (int j = 0; j < 512; j++) {
             co_u = u_LimitLeft + increment*j;
             
-            vec3 eyeRay = EyeRay::getEyeRay(co_u, co_v, -View_Plane.distance);
+            HitRecord hitRecord = RayTracer::trace(co_u, co_v);
             
-            float p_a = plane.a;
-            float p_b = plane.b;
-            float p_c = plane.c;
-            float p_d = plane.d;
-            vec3 p = CameraPositionPoint;
-            vec3 d = eyeRay;
+            vec3 ColorShade = Shader::shadePixel(hitRecord);
+            
+            pixels[(i*512+j)*4+0]=pow(ColorShade.r, (1/GammaValue));
+            pixels[(i*512+j)*4+1]=pow(ColorShade.g, (1/GammaValue));
+            pixels[(i*512+j)*4+2]=pow(ColorShade.b, (1/GammaValue));
+            pixels[(i*512+j)*4+3]=1.0f;
+        }
+    }
+}
 
-            float intersectT = -(p_a*p.x+p_b*p.y+p_c*p.z+p_d) / (p_a*d.x+p_b*d.y+p_c*d.z);
-            
-            if (intersectT>0) {
-                vec3 intersectionPoint = p+intersectT*d;
-                vec3 intersectionNormal = plane.normal;
-                
-                vec3 ColorShade = Shader::shadePixel(intersectionPoint, intersectionNormal, eyeRay);
-                
-                pixels[(i*512+j)*4+0]=pow(ColorShade.r, (1/GammaValue));
-                pixels[(i*512+j)*4+1]=pow(ColorShade.g, (1/GammaValue));
-                pixels[(i*512+j)*4+2]=pow(ColorShade.b, (1/GammaValue));
-                pixels[(i*512+j)*4+3]=1.0f;
+HitRecord RayTracer::trace(float co_u, float co_v)
+{
+    vec3 eyeRay = EyeRay::getEyeRay(co_u, co_v, -View_Plane.distance);
+    HitRecord current, best;
+    best.eyeRay.multiple = Infinity;
+    
+    for (int i=0; i<objectsList.size(); i++) {
+        Object *object = objectsList[i];
+        if (object->isIntersectedByRay(CameraPositionPoint, eyeRay)) {
+            current = object->getHitRecord(CameraPositionPoint, eyeRay);
+            if (current.eyeRay.multiple<best.eyeRay.multiple) {
+                best = current;
+                best.object = object;
             }
         }
     }
-    cout << "Finished! ";
+    return best;
 }
+
+//void RayTracer::traceSphereForHW01(const Sphere& sphere, const vec3& k_d)
+//{
+//    // Offset on the View Plane
+//    float co_u = View_Plane.LimitLeft, co_v = View_Plane.LimitBottom;
+//    
+//    float u_LimitLeft = View_Plane.LimitLeft;
+//    float v_LimitBottom = View_Plane.LimitBottom;
+//    float increment = 0.1/(512/2);
+//    for (int i = 0; i < 512; i++) {
+//        co_v = v_LimitBottom + increment*i;
+//        for (int j = 0; j < 512; j++) {
+//            co_u = u_LimitLeft + increment*j;
+//   
+//            
+//            
+//            vec3 eyeRay = EyeRay::getEyeRay(co_u, co_v, -View_Plane.distance);
+//            
+//            vec3 p = CameraPositionPoint;
+//            vec3 d = eyeRay;
+//            vec3 c = sphere.center;
+//            float r = sphere.radius;
+//            
+//            float delta_a = dot(d,d);
+//            float delta_b = 2.0*(dot(p,d)-dot(d, c));
+//            float delta_c = dot(p,p)-2.0*(dot(c,p))+dot(c,c)-pow(r, 2);
+//            float determinant = pow(delta_b, 2)-4.0*(delta_a*delta_c);
+//
+//            if (determinant > 0) {
+//                // (-b - delta)/2a
+//                float closerT = (-delta_b - glm::sqrt(determinant))/(2*delta_a);
+//                vec3 intersectionPoint = p+closerT*d;
+//                vec3 intersectionNormal = normalize(intersectionPoint-sphere.center);
+//                
+//                vec3 ColorShade = Shader::shadePixel(intersectionPoint, intersectionNormal, eyeRay);
+//
+//                pixels[(i*512+j)*4+0]=pow(ColorShade.r, (1/GammaValue));
+//                pixels[(i*512+j)*4+1]=pow(ColorShade.g, (1/GammaValue));
+//                pixels[(i*512+j)*4+2]=pow(ColorShade.b, (1/GammaValue));
+//                pixels[(i*512+j)*4+3]=1.0f;
+//            }
+//        }
+//    }
+//    cout << "Finished! ";
+//}
+//
+//
+//
+//void RayTracer::tracePlaneForHW01(const Plane& plane, const vec4& colorRGBA, const vec3& k_d)
+//{
+//    // Offset on the View Plane
+//    float co_u = View_Plane.LimitLeft, co_v = View_Plane.LimitBottom;
+//    
+//    float u_LimitLeft = View_Plane.LimitLeft;
+//    float v_LimitBottom = View_Plane.LimitBottom;
+//    float increment = 0.1/(512/2);
+//    for (int i = 0; i < 512; i++) {
+//        co_v = v_LimitBottom + increment*i;
+//        for (int j = 0; j < 512; j++) {
+//            co_u = u_LimitLeft + increment*j;
+//            
+//            vec3 eyeRay = EyeRay::getEyeRay(co_u, co_v, -View_Plane.distance);
+//            
+//            float p_a = plane.a;
+//            float p_b = plane.b;
+//            float p_c = plane.c;
+//            float p_d = plane.d;
+//            vec3 p = CameraPositionPoint;
+//            vec3 d = eyeRay;
+//
+//            float intersectT = -(p_a*p.x+p_b*p.y+p_c*p.z+p_d) / (p_a*d.x+p_b*d.y+p_c*d.z);
+//            
+//            if (intersectT>0) {
+//                vec3 intersectionPoint = p+intersectT*d;
+//                vec3 intersectionNormal = plane.normal;
+//                
+//                vec3 ColorShade = Shader::shadePixel(intersectionPoint, intersectionNormal, eyeRay);
+//                
+//                pixels[(i*512+j)*4+0]=pow(ColorShade.r, (1/GammaValue));
+//                pixels[(i*512+j)*4+1]=pow(ColorShade.g, (1/GammaValue));
+//                pixels[(i*512+j)*4+2]=pow(ColorShade.b, (1/GammaValue));
+//                pixels[(i*512+j)*4+3]=1.0f;
+//            }
+//        }
+//    }
+//    cout << "Finished! ";
+//}
 
 
 void RayTracer::initVariables()

@@ -29,9 +29,6 @@ public:
     void initVariables();
     void renderImage();
     HitRecord trace(float co_u, float co_v);
-//    void traceSphereForHW01(const Sphere& sphere, const vec3& k_d);
-//    void tracePlaneForHW01(const Plane& plane, const vec4& colorRGBA, const vec3& k_d);
-
 };
 
 

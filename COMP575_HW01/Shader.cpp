@@ -8,7 +8,6 @@
 
 #include "Shader.h"
 
-float SpecularPower;
 float GammaValue = 2.2;
 
 vec3 Shader::shadePixel(const HitRecord& hitRecord)

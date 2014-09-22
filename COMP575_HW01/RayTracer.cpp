@@ -26,6 +26,7 @@ void RayTracer::renderImage()
     // Offset on the View Plane
     float co_u = View_Plane.LimitLeft, co_v = View_Plane.LimitBottom;
     
+    // First loop for locating each pixel
     float u_LimitLeft = View_Plane.LimitLeft;
     float v_LimitBottom = View_Plane.LimitBottom;
     float increment = 0.1/(512/2);
@@ -33,16 +34,29 @@ void RayTracer::renderImage()
         co_v = v_LimitBottom + increment*i;
         for (int j = 0; j < 512; j++) {
             co_u = u_LimitLeft + increment*j;
+            // Second loop for Antialiasing
+            vec3 ColorShade;
+            vec3 colorSum = vec3(0,0,0);
+            float co_v_rand, co_u_rand;
+            int anti_Num = 64;
+            float AntialiasingInterval = increment/anti_Num;
+            for (int m = 0; m < anti_Num; m++) {
+                co_v_rand = co_v + AntialiasingInterval*(rand()%anti_Num);
+                co_u_rand = co_u + AntialiasingInterval*(rand()%anti_Num);
+                
+                HitRecord hitRecord = RayTracer::trace(co_u_rand, co_v_rand);
+                ColorShade = Shader::shadePixel(hitRecord);
+                colorSum += ColorShade;
+            }
+            ColorShade = vec3(colorSum.r/anti_Num, colorSum.g/anti_Num, colorSum.b/anti_Num);
             
-            HitRecord hitRecord = RayTracer::trace(co_u, co_v);
-            
-            vec3 ColorShade = Shader::shadePixel(hitRecord);
             
             pixels[(i*512+j)*4+0]=pow(ColorShade.r, (1/GammaValue));
             pixels[(i*512+j)*4+1]=pow(ColorShade.g, (1/GammaValue));
             pixels[(i*512+j)*4+2]=pow(ColorShade.b, (1/GammaValue));
             pixels[(i*512+j)*4+3]=1.0f;
         }
+        cout << "Finished line from bottome: " << i << "\n";
     }
 }
 

@@ -13,6 +13,7 @@
 #include "Config.h"
 #include "Object.h"
 #include <vector>
+#include <cstdlib>
 using namespace std;
 using namespace glm;
 class Sphere;
